@@ -1,10 +1,10 @@
-package com.nexusnode.launcher;
+package com.nexusnode.launcher.ui;
 
 import javax.swing.*;
 
 public class Login {
     public static void main(String[] args) {
-        JFrame frame = new JFrame("User com.nexusnode.launcher.Login");
+        JFrame frame = new JFrame("User com.nexusnode.launcher.ui.Login");
         frame.setSize(400, 300);
 
         JPanel panel = new JPanel();
@@ -27,7 +27,7 @@ public class Login {
         passText.setBounds(100,  60, 150, 30);
         panel.add(passText);
 
-        JButton playButton = new JButton("com.nexusnode.launcher.Login");
+        JButton playButton = new JButton("com.nexusnode.launcher.ui.Login");
         playButton.setBounds(100, 100, 150, 30);
         panel.add(playButton);
 

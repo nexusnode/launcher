@@ -10,23 +10,26 @@ public class MinecraftLauncher {
 
     public static void main(String[] args) {
         try {
-            launch(args);
+            MinecraftLauncher launcher = new MinecraftLauncher();
+            launcher.launch();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void launch(String[] args) throws Exception {
-        String directory = "";
+    private void launch() throws Exception {
+        /*String directory = "";
+
+        List<String> commands = buildCommands(pack, memory, version, options);
         ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(directory).redirectErrorStream(true);
 
-        Process process = processBuilder.start();
+        Process process = processBuilder.start();*/
     }
 
-    private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
+    private List<String> buildCommands(MojangUser mojangUser) {
         List<String> commands = new ArrayList<>();
 
-        Map<String, String> params = new HashMap<String, String>();
+        /*Map<String, String> params = new HashMap<String, String>();
 
         params.put("auth_username", mojangUser.getUsername());
         params.put("auth_session", mojangUser.getSessionId());
@@ -44,7 +47,7 @@ public class MinecraftLauncher {
         params.put("classpath", cpString);
 
         params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
-        params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
+        params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));*/
 
         return commands;
     }

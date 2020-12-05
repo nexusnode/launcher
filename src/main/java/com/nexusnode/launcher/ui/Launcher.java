@@ -1,4 +1,4 @@
-package com.nexusnode.launcher;
+package com.nexusnode.launcher.ui;
 
 
 import javax.swing.*;

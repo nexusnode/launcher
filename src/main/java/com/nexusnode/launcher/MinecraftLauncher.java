@@ -27,7 +27,6 @@ import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
-import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;

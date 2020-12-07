@@ -1,2 +1,3 @@
-rootProject.name = 'launcher'
+rootProject.name = 'Launcher'
+include 'launcher'
 

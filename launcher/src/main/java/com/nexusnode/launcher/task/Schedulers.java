@@ -1,0 +1,88 @@
+/*
+ * Crafting Dead Launcher
+ * Copyright (C) 2020  bluebird6900  and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.nexusnode.launcher.task;
+
+import javafx.application.Platform;
+import com.nexusnode.launcher.util.Logging;
+
+import javax.swing.*;
+import java.util.concurrent.*;
+
+/**
+ *
+ * @author bluebird6900
+ */
+public final class Schedulers {
+
+    private Schedulers() {
+    }
+
+    private static volatile ThreadPoolExecutor CACHED_EXECUTOR;
+
+    public static synchronized ThreadPoolExecutor newThread() {
+        if (CACHED_EXECUTOR == null)
+            CACHED_EXECUTOR = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                    60, TimeUnit.SECONDS, new SynchronousQueue<>(), Executors.defaultThreadFactory());
+
+        return CACHED_EXECUTOR;
+    }
+
+    private static volatile ExecutorService IO_EXECUTOR;
+
+    public static synchronized ExecutorService io() {
+        if (IO_EXECUTOR == null) {
+            int threads = Math.min(Runtime.getRuntime().availableProcessors() * 4, 64);
+            IO_EXECUTOR = Executors.newFixedThreadPool(threads,
+                    runnable -> {
+                        Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                        thread.setDaemon(true);
+                        return thread;
+                    });
+        }
+
+        return IO_EXECUTOR;
+    }
+
+    public static Executor javafx() {
+        return Platform::runLater;
+    }
+
+    public static Executor swing() {
+        return SwingUtilities::invokeLater;
+    }
+
+    public static Executor defaultScheduler() {
+        return newThread();
+    }
+
+    public static synchronized void shutdown() {
+        Logging.LOG.info("Shutting down executor services.");
+
+        if (CACHED_EXECUTOR != null)
+            CACHED_EXECUTOR.shutdown();
+
+        if (IO_EXECUTOR != null)
+            IO_EXECUTOR.shutdown();
+    }
+
+    public static Future<?> schedule(Executor executor, Runnable command) {
+        FutureTask<?> future = new FutureTask<Void>(command, null);
+        executor.execute(future);
+        return future;
+    }
+}

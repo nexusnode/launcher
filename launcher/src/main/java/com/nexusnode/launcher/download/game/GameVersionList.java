@@ -27,11 +27,15 @@ import com.nexusnode.launcher.util.io.NetworkUtils;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+
+import static com.ea.async.Async.await;
 
 /**
  *
@@ -59,7 +63,8 @@ public final class GameVersionList extends VersionList<GameRemoteVersion> {
         }
     }
 
-    public CompletableFuture<?> refreshFeature() {
+    @Override
+    public CompletableFuture<?> refreshFuture() {
         OkHttpClient client = new OkHttpClient.Builder().build();
         Request request = new Request.Builder()
                 .url(downloadProvider.getVersionListURL())
@@ -69,33 +74,32 @@ public final class GameVersionList extends VersionList<GameRemoteVersion> {
         OkHttpResponseFuture result = new OkHttpResponseFuture();
         call.enqueue(result);
 
-        return result.future.
-                thenComposeAsync(response -> {
-                    lock.writeLock().lock();
+        return result.future.thenComposeAsync(response -> {
+            try {
+                lock.writeLock().lock();
+                versions.clear();
 
-                    try {
-                        versions.clear();
+                String json = response.body().string();
+                GameRemoteVersions root = JsonUtils.GSON.fromJson(json, GameRemoteVersions.class);
+                for (GameRemoteVersionInfo remoteVersion : root.getVersions()) {
+                    versions.put(remoteVersion.getGameVersion(), new GameRemoteVersion(
+                            remoteVersion.getGameVersion(),
+                            remoteVersion.getGameVersion(),
+                            Collections.singletonList(remoteVersion.getUrl()),
+                            remoteVersion.getType(), remoteVersion.getReleaseTime())
+                    );
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                lock.writeLock().unlock();
+            }
 
-                        String json = response.toString();
-                        GameRemoteVersions root = JsonUtils.GSON.fromJson(json, GameRemoteVersions.class);
-                        for (GameRemoteVersionInfo remoteVersion : root.getVersions()) {
-                            versions.put(remoteVersion.getGameVersion(), new GameRemoteVersion(
-                                    remoteVersion.getGameVersion(),
-                                    remoteVersion.getGameVersion(),
-                                    Collections.singletonList(remoteVersion.getUrl()),
-                                    remoteVersion.getType(), remoteVersion.getReleaseTime())
-                            );
-                        }
-                    } finally {
-                        lock.writeLock().unlock();
-                    }
-
-                    return CompletableFuture.completedFuture(null);
-                })
-                .thenApplyAsync(unused -> (Exception) null)
-                .exceptionally(throwable -> {
-                    throw new CompletionException(throwable);
-                });
+            return CompletableFuture.completedFuture(null);
+        })
+        .exceptionally(throwable -> {
+            throw new CompletionException(throwable);
+        });
     }
 
     @Override

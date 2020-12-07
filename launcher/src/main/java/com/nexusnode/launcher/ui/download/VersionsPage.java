@@ -183,7 +183,30 @@ public final class VersionsPage extends BorderPane implements WizardPage, Refres
     public void refresh() {
         VersionList<?> currentVersionList = versionList;
         root.setContent(spinner, ContainerAnimations.FADE.getAnimationProducer());
-        executor = currentVersionList.refreshAsync(gameVersion).whenComplete(exception -> {
+
+        currentVersionList.refreshFuture(gameVersion).thenComposeAsync(unused -> {
+            List<RemoteVersion> items = loadVersions();
+
+            Platform.runLater(() -> {
+                if (versionList != currentVersionList) return;
+                if (currentVersionList.getVersions(gameVersion).isEmpty()) {
+                    root.setContent(emptyPane, ContainerAnimations.FADE.getAnimationProducer());
+                } else {
+                    if (items.isEmpty()) {
+                        chkRelease.setSelected(true);
+                        chkSnapshot.setSelected(true);
+                        chkOld.setSelected(true);
+                    } else {
+                        list.getItems().setAll(items);
+                    }
+                    root.setContent(centrePane, ContainerAnimations.FADE.getAnimationProducer());
+                }
+            });
+
+            return null;
+        });
+
+        /*executor = currentVersionList.refreshAsync(gameVersion).whenComplete(exception -> {
             if (exception == null) {
                 List<RemoteVersion> items = loadVersions();
 
@@ -209,7 +232,7 @@ public final class VersionsPage extends BorderPane implements WizardPage, Refres
                     root.setContent(failedPane, ContainerAnimations.FADE.getAnimationProducer());
                 });
             }
-        }).executor().start();
+        }).executor().start();*/
     }
 
     @Override

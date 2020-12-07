@@ -21,6 +21,7 @@ import com.nexusnode.launcher.task.Task;
 import com.nexusnode.launcher.util.SimpleMultimap;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -63,12 +64,18 @@ public abstract class VersionList<T extends RemoteVersion> {
      */
     public abstract Task<?> refreshAsync();
 
+    public abstract CompletableFuture<?> refreshFuture();
+
     /**
      * @param gameVersion the remote version depends on
      * @return the task to reload the remote version list.
      */
     public Task<?> refreshAsync(String gameVersion) {
         return refreshAsync();
+    }
+
+    public CompletableFuture<?> refreshFuture(String gameVersion) {
+        return refreshFuture();
     }
 
     public Task<?> loadAsync() {
